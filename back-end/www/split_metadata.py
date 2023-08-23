@@ -4,6 +4,7 @@ import json
 import numpy as np
 import copy
 from util import *
+import os
 
 
 def split_and_save_data(vm, target_key_type, method="assign", no_link=False):
@@ -12,8 +13,10 @@ def split_and_save_data(vm, target_key_type, method="assign", no_link=False):
     for v in vm:
         k = to_key(v, target_key_type)
         if no_link:
-            if "url_part" in v: del v["url_part"]
-            if "url_root" in v: del v["url_root"]
+            if "url_part" in v:
+                del v["url_part"]
+            if "url_root" in v:
+                del v["url_root"]
         vm_dict[k].append(v)
 
     p = "../data/split/"
@@ -23,9 +26,12 @@ def split_and_save_data(vm, target_key_type, method="assign", no_link=False):
     print("Split data by " + target_key_type)
     if method == "random":
         vm_train, vm_valid, vm_test = split(vm_dict, target_key_type)
-        save_json(vm_valid, p+"metadata_validation_random_split_by_"+target_key_type+".json")
-        save_json(vm_test, p+"metadata_test_random_split_by_"+target_key_type+".json")
-        save_json(vm_train, p+"metadata_train_random_split_by_"+target_key_type+".json")
+        save_json(vm_valid, p+"metadata_validation_random_split_by_" +
+                  target_key_type+".json")
+        save_json(vm_test, p+"metadata_test_random_split_by_" +
+                  target_key_type+".json")
+        save_json(vm_train, p+"metadata_train_random_split_by_" +
+                  target_key_type+".json")
     elif method == "assign":
         if target_key_type == "camera":
             three_splits = [
@@ -55,19 +61,26 @@ def split_and_save_data(vm, target_key_type, method="assign", no_link=False):
                 print("Split %d" % i)
                 s = three_splits[i]
                 vm_train, vm_valid, vm_test = split(vm_dict, target_key_type,
-                        train_key=s["train"], valid_key=s["valid"], test_key=s["test"])
-                save_json(vm_valid, p+"metadata_validation_split_"+str(i)+"_by_"+target_key_type+".json")
-                save_json(vm_test, p+"metadata_test_split_"+str(i)+"_by_"+target_key_type+".json")
-                save_json(vm_train, p+"metadata_train_split_"+str(i)+"_by_"+target_key_type+".json")
+                                                    train_key=s["train"], valid_key=s["valid"], test_key=s["test"])
+                save_json(vm_valid, p+"metadata_validation_split_" +
+                          str(i)+"_by_"+target_key_type+".json")
+                save_json(vm_test, p+"metadata_test_split_" +
+                          str(i)+"_by_"+target_key_type+".json")
+                save_json(vm_train, p+"metadata_train_split_" +
+                          str(i)+"_by_"+target_key_type+".json")
         elif target_key_type == "date":
             target_keys = list(vm_dict.keys())
             target_keys = sorted(target_keys)[::-1]
-            train_key, valid_key, test_key = divide_list(target_keys, frac_valid=0.07, frac_test=0.35)
+            train_key, valid_key, test_key = divide_list(
+                target_keys, frac_valid=0.07, frac_test=0.35)
             vm_train, vm_valid, vm_test = split(vm_dict, target_key_type,
-                    train_key=train_key, valid_key=valid_key, test_key=test_key)
-            save_json(vm_valid, p+"metadata_validation_split_by_"+target_key_type+".json")
-            save_json(vm_test, p+"metadata_test_split_by_"+target_key_type+".json")
-            save_json(vm_train, p+"metadata_train_split_by_"+target_key_type+".json")
+                                                train_key=train_key, valid_key=valid_key, test_key=test_key)
+            save_json(vm_valid, p+"metadata_validation_split_by_" +
+                      target_key_type+".json")
+            save_json(vm_test, p+"metadata_test_split_by_" +
+                      target_key_type+".json")
+            save_json(vm_train, p+"metadata_train_split_by_" +
+                      target_key_type+".json")
     print("The data split is saved in: " + p)
 
 
@@ -86,7 +99,8 @@ def split(vm_dict, target_key_type, train_key=None, valid_key=None, test_key=Non
         target_keys = list(vm_dict.keys())
         np.random.shuffle(target_keys)
         # 10% for validation, 30% for testing
-        train_key, valid_key, test_key = divide_list(target_keys, frac_valid=0.1, frac_test=0.3)
+        train_key, valid_key, test_key = divide_list(
+            target_keys, frac_valid=0.1, frac_test=0.3)
     vm_valid = []
     vm_test = []
     vm_train = []
@@ -104,7 +118,8 @@ def split(vm_dict, target_key_type, train_key=None, valid_key=None, test_key=Non
     print("\nTesting:")
     print_distribution(vm_test, target_key_type=target_key_type)
     n = len(vm_valid) + len(vm_test) + len(vm_train)
-    print("\nSize of validation set: %d (%.2f)" % (len(vm_valid), len(vm_valid)/n))
+    print("\nSize of validation set: %d (%.2f)" %
+          (len(vm_valid), len(vm_valid)/n))
     print("Size of test set: %d (%.2f)" % (len(vm_test), len(vm_test)/n))
     print("Size of training set: %d (%.2f)" % (len(vm_train), len(vm_train)/n))
     return (vm_train, vm_valid, vm_test)
@@ -121,7 +136,8 @@ def print_distribution(vm, target_key_type):
             count_vm[k]["neg"] += 1
     for k in count_vm:
         count_vm[k]["sum"] = count_vm[k]["pos"] + count_vm[k]["neg"]
-        count_vm[k]["pos_%"] = np.round(count_vm[k]["pos"] / count_vm[k]["sum"], 2)
+        count_vm[k]["pos_%"] = np.round(
+            count_vm[k]["pos"] / count_vm[k]["sum"], 2)
     print(json.dumps(count_vm, indent=4))
 
 
@@ -144,55 +160,63 @@ def aggregate_label(vm, add_weight=True):
     for i in range(len(vm)):
         has_error = False
         v = vm[i]
+        if not os.path.exists(os.path.join("/home/paperspace/git/deep-smoke-machine/back-end/data/extracted-data/npy/rgb", v["file_name"]+".npy")):
+            continue
         label_state_admin = v["label_state_admin"]
         label_state = v["label_state"]
-        if label_state_admin == 47: # pos (gold standard)
-            v["label"] = 1
-            if add_weight: v["weight"] = 1
-            print("Warning: found gold standards")
-        elif label_state_admin == 32: # neg (gold standard)
-            v["label"] = 0
-            if add_weight: v["weight"] = 1
-            print("Warning: found gold standards")
-        elif label_state_admin == 23: # strong pos
+        if label_state_admin == 47:  # pos (gold standard)
             v["label"] = 1
             if add_weight:
-                if label_state == 23: # strong pos
-                    v["weight"] = 1 # (1+1)/2
-                elif label_state == 16: # strong neg
-                    v["weight"] = 0.5 # (1+0)/2
-                elif label_state == 20: # weak neg
-                    v["weight"] = 0.66 # (1+0.33)/2
-                elif label_state == 19: # weak pos
-                    v["weight"] = 0.83 # (1+0.66)/2
-                else: # not determined by citizens
-                    v["weight"] = 0.75
-        elif label_state_admin == 16: # strong neg
+                v["weight"] = 1
+            print("Warning: found gold standards")
+        elif label_state_admin == 32:  # neg (gold standard)
             v["label"] = 0
             if add_weight:
-                if label_state == 23: # strong pos
-                    v["weight"] = 0.5 # (1+0)/2
-                elif label_state == 16: # strong neg
-                    v["weight"] = 1 # (1+1)/2
-                elif label_state == 20: # weak neg
-                    v["weight"] = 0.83 # (1+0.66)/2
-                elif label_state == 19: # weak pos
-                    v["weight"] = 0.66 # (1+0.33)/2
-                else: # not determined by citizens
+                v["weight"] = 1
+            print("Warning: found gold standards")
+        elif label_state_admin == 23:  # strong pos
+            v["label"] = 1
+            if add_weight:
+                if label_state == 23:  # strong pos
+                    v["weight"] = 1  # (1+1)/2
+                elif label_state == 16:  # strong neg
+                    v["weight"] = 0.5  # (1+0)/2
+                elif label_state == 20:  # weak neg
+                    v["weight"] = 0.66  # (1+0.33)/2
+                elif label_state == 19:  # weak pos
+                    v["weight"] = 0.83  # (1+0.66)/2
+                else:  # not determined by citizens
                     v["weight"] = 0.75
-        else: # not determined by researchers
-            if label_state == 23: # strong pos
+        elif label_state_admin == 16:  # strong neg
+            v["label"] = 0
+            if add_weight:
+                if label_state == 23:  # strong pos
+                    v["weight"] = 0.5  # (1+0)/2
+                elif label_state == 16:  # strong neg
+                    v["weight"] = 1  # (1+1)/2
+                elif label_state == 20:  # weak neg
+                    v["weight"] = 0.83  # (1+0.66)/2
+                elif label_state == 19:  # weak pos
+                    v["weight"] = 0.66  # (1+0.33)/2
+                else:  # not determined by citizens
+                    v["weight"] = 0.75
+        else:  # not determined by researchers
+            if label_state == 23:  # strong pos
                 v["label"] = 1
-                if add_weight: v["weight"] = 1
-            elif label_state == 16: # strong neg
+                if add_weight:
+                    v["weight"] = 1
+            elif label_state == 16:  # strong neg
                 v["label"] = 0
-                if add_weight: v["weight"] = 1
-            elif label_state == 20: # weak neg
+                if add_weight:
+                    v["weight"] = 1
+            elif label_state == 20:  # weak neg
                 v["label"] = 0
-                if add_weight: v["weight"] = 0.66
-            elif label_state == 19: # weak pos
+                if add_weight:
+                    v["weight"] = 0.66
+            elif label_state == 19:  # weak pos
                 v["label"] = 1
-                if add_weight: v["weight"] = 0.66
+                if add_weight:
+                    v["weight"] = 0.66
             else:
                 has_error = True
         if has_error or "label" not in v:
@@ -220,7 +244,7 @@ def main(argv):
     method = "assign"
     no_link = True
     split_and_save_data(vm, "date", method=method, no_link=no_link)
-    split_and_save_data(vm, "camera", method=method, no_link=no_link)
+    # split_and_save_data(vm, "camera", method=method, no_link=no_link)
 
 
 if __name__ == "__main__":
