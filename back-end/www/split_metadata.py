@@ -5,7 +5,7 @@ import numpy as np
 import copy
 from util import *
 import os
-
+import pandas as pd
 
 def split_and_save_data(vm, target_key_type, method="assign", no_link=False):
     # Index metadata by date or camera
@@ -157,13 +157,10 @@ def to_key(v, target_key_type):
 def aggregate_label(vm, add_weight=True):
     vm = copy.deepcopy(vm)
     vm_new = []
-    for i in range(len(vm)):
+    for row in vm.iterrows():
         has_error = False
-        v = vm[i]
-        if not os.path.exists(os.path.join("/home/paperspace/git/deep-smoke-machine/back-end/data/extracted-data/npy/rgb", v["file_name"]+".npy")):
-            continue
+        v = row[1]
         label_state_admin = v["label_state_admin"]
-        label_state = v["label_state"]
         if label_state_admin == 47:  # pos (gold standard)
             v["label"] = 1
             if add_weight:
@@ -239,7 +236,7 @@ def main(argv):
         print("Must confirm by running: python split_metadata.py confirm")
         return
 
-    vm = load_json("../data/metadata.json")
+    vm = pd.read_json("/home/pravar_d_mahajan/git/deep-smoke-machine/back-end/data/metadata-frissewind-parts.json")
     vm = aggregate_label(vm)
     method = "assign"
     no_link = True

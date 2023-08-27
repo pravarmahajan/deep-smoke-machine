@@ -509,7 +509,7 @@ class I3dLearner(BaseLearner):
 
         # Spawn processes
         n_gpu = torch.cuda.device_count()
-        if False:#self.parallel and n_gpu > 1:
+        if self.parallel and n_gpu > 1:
             # TODO: multiple GPUs will cause an error when generating summary videos
             self.can_parallel = True
             self.log("Let's use " + str(n_gpu) + " GPUs!")

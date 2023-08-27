@@ -6,7 +6,7 @@ import pandas as pd
 
 # Get video metadata and save to a file
 def main(argv):
-    vid_path = '/home/paperspace/git/deep-smoke-machine/back-end/data/extracted-data/frissewind'
+    vid_path = '/home/pravar_d_mahajan/git/deep-smoke-machine/back-end/data/extracted-data/frissewind'
     # Check
     if len(argv) > 1:
         if argv[1] != "confirm":
@@ -22,7 +22,7 @@ def main(argv):
     vm = get_video_metadata(vid_path)
 
     # Save and return dataset
-    file_path = "/home/paperspace/git/deep-smoke-machine/back-end/data/metadata-fresh-air-aug-17.json"
+    file_path = "/home/pravar_d_mahajan/git/deep-smoke-machine/back-end/data/metadata-fresh-air-aug-17.json"
     check_and_create_dir(file_path)
     vm.to_json(file_path)
 
